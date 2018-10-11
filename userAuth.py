@@ -56,11 +56,14 @@ def getUserN(fName):
     return ans
 
 
-def addUser(fName, user, passw):
+def addUser(fName, user, passw, confirmpassw):
     'adds the user into file f. Returns 1 if successful, 0 if user already exists'
     data = getUsers(fName)
     if user not in data:
-        data[user] = passw
+        if passw == confirmpassw:
+            data[user] = passw
+        else:
+            return 0
         updateFile(fName, data)
         return 1
     return 0
@@ -94,10 +97,10 @@ def updateFile(fName, data):
 
 
 def clearUsers(fName):
-    'removes all users'    
+    'removes all users'  
     updateFile(fName, {})
     
 
 
-testing()
+#testing()
     
