@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter.ttk import *
 from userAuth import *
 
-#Initialize Window class
+#App class - top level controller for gui
 class App(Tk):
 
     def __init__(self, *args, **kwargs):
@@ -12,19 +12,25 @@ class App(Tk):
         container.grid_rowconfigure(0,weight=1)
         container.grid_columnconfigure(0, weight=1)
 
+
+        #Instantiate each frame and assign it to the frame array in the app object
         self.frames = {}
 
         for F in (CreateAccount, Login):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-
+        #Initially show the create account screen
         self.show_frame(CreateAccount)
 
+    #function to show a given frame (context)
     def show_frame(self, context):
         frame = self.frames[context]
         frame.tkraise()
 
+#Frame objects - each view in GUI is object which is shown by the app object
+#Eventually moved to seperate file?
+#Create account screen
 class CreateAccount(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
@@ -55,6 +61,7 @@ class CreateAccount(Frame):
         cpwField.grid(column=1, row=5)
         createAccountBtn.grid(column=1, row=6)
 
+#Login screen
 class Login(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
@@ -80,37 +87,8 @@ class Login(Frame):
         usernameField.grid(column=1,row=3)
         pwField.grid(column=1,row=4)
         LoginBtn.grid(column=1, row=6)
-            
 
-    
-
-
-    
-        
-        
-        # createAcctScreenBtn = Button(self, text="Create Account", command=show_frame(CreateAccount))
-        # loginScreenBtn = Button(self, text="Login", command=show_frame(Login))
-
-        # createAcctScreenBtn.place(x=0,y=1*lineheight)
-        # loginScreenBtn.place(x=120,y=1*lineheight)
-
-        # usernameLbl = Label(self, text="Username:")
-        # pwLbl = Label(self, text="Password:")
-        # cpwLbl = Label(self, text="Confirm Password:")
-        # usernameField = Entry(self, width=20)
-        # pwField = Entry(self, width=20)
-        # cpwField = Entry(self, width=20)
-        # createAccountBtn = Button(self, text="Create Account")
-
-        # usernameLbl.place(x=0,y=2*lineheight)
-        # pwLbl.place(x=0,y=3*lineheight)
-        # cpwLbl.place(x=0,y=4*lineheight)
-        # usernameField.place(x=120,y=2*lineheight)
-        # pwField.place(x=120,y=3*lineheight)
-        # cpwField.place(x=120,y=4*lineheight)
-        # createAccountBtn.place(x=120,y=5*lineheight)
-
-
+#Instantiate app and change title and dimensions
 app = App()
 app.title("Pacemaker DCM")
 
