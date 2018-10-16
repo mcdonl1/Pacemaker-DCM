@@ -16,12 +16,13 @@ class App(Tk):
         #Instantiate each frame and assign it to the frame array in the app object
         self.frames = {}
 
-        for F in (CreateAccount, Login):
+        for F in (CreateAccount, Login, ModeSelect):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
         #Initially show the create account screen
         self.show_frame(CreateAccount)
+        #self.show_frame(ModeSelect)
 
     #function to show a given frame (context)
     def show_frame(self, context):
@@ -39,7 +40,7 @@ class CreateAccount(Frame):
         loginScreenBtn = Button(self, text="Login", command=lambda:controller.show_frame(Login))
         createAcctScreenBtn.grid(row=1, column=0,padx=5, pady=5)
         loginScreenBtn.grid(row=1, column=1,padx=5, pady=5)
-
+        
         lbl = Label(self, text="Create a new user account.")
         lbl.grid(row=0, column=1, padx=10, pady=10)
 
@@ -88,6 +89,46 @@ class Login(Frame):
         pwField.grid(column=1,row=4)
         LoginBtn.grid(column=1, row=6)
 
+class ModeSelect(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+
+        self.initValue = StringVar() 
+        self.initValue.set("Select a Mode")
+
+        modes = [
+            "Select a Mode",
+            "AAT",
+            "VVT",
+            "AOO",
+            "AAI",
+            "VOO",
+            "VVI",
+            "VDD",
+            "DOO",
+            "DDI",
+            "DDD",
+            "AOOR",
+            "AAIR",
+            "VOOR",
+            "VVIR",
+            "VDDR",
+            "DOOR",
+            "DDIR",
+            "DDDR"
+        ]
+        
+        lbl = Label(self, text="Select operating mode: ")
+        dropdown = OptionMenu(self, self.initValue, *modes, command=self.func)
+        
+        lbl.grid(row=0, column=0)
+        dropdown.grid(row=1,column=1)
+
+        currentModeText = Label(self, text="Current Mode: ")
+        currentModeText.grid(row=1, column=0, padx=5)
+    
+    def func(self, value): #to be modified later to display new frame with param editer
+        print(value)
 #Instantiate app and change title and dimensions
 app = App()
 app.title("Pacemaker DCM")
