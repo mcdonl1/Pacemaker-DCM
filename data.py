@@ -1,0 +1,42 @@
+modes = [
+            "Select a Mode",
+            "AAT",
+            "VVT",
+            "AOO",
+            "AAI",
+            "VOO",
+            "VVI",
+            "VDD",
+            "DOO",
+            "DDI",
+            "DDD",
+            "AOOR",
+            "AAIR",
+            "VOOR",
+            "VVIR",
+            "VDDR",
+            "DOOR",
+            "DDIR",
+            "DDDR"
+        ]
+
+paramArrays = {   
+            "AAT": ["LRL", "URL", "AA", "APW", "AS", "ARP", "PVARP"],
+            "VVT": [],
+            "AOO": [],
+            "AAI": [],
+            "VOO": [],
+            "VVI": [],
+            "VDD": [],
+            "DOO": [],
+            "DDI": [],
+            "DDD": [],
+            "AOOR": [],
+            "AAIR": [],
+            "VOOR": [],
+            "VVIR": [],
+            "VDDR": [],
+            "DOOR": [],
+            "DDIR": [],
+            "DDDR": []
+}

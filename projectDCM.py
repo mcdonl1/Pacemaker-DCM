@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
 from userAuth import *
+import data as data
 
 #App class - top level controller for gui
 class App(Tk):
@@ -16,7 +17,7 @@ class App(Tk):
         #Instantiate each frame and assign it to the frame array in the app object
         self.frames = {}
 
-        for F in (CreateAccount, Login, ModeSelect):
+        for F in (CreateAccount, Login, MainControl):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -42,7 +43,7 @@ class CreateAccount(Frame):
         loginScreenBtn.grid(row=1, column=1,padx=5, pady=5)
         
         lbl = Label(self, text="Create a new user account.")
-        lbl.grid(row=0, column=1, padx=10, pady=10)
+        lbl.grid(row=0, column=1, pady=10)
 
         #components
         usernameLbl = Label(self, text="Username:")
@@ -54,13 +55,13 @@ class CreateAccount(Frame):
         createAccountBtn = Button(self, text="Create Account", command=addUser("users.txt",usernameField.get(), pwField.get(), cpwField.get()))
 
         #design
-        usernameLbl.grid(column=0,row=3)
-        pwLbl.grid(column=0,row=4)
-        cpwLbl.grid(column=0,row=5)
-        usernameField.grid(column=1,row=3)
-        pwField.grid(column=1,row=4)
-        cpwField.grid(column=1, row=5)
-        createAccountBtn.grid(column=1, row=6)
+        usernameLbl.grid(column=0,row=3, sticky=W)
+        pwLbl.grid(column=0,row=4, sticky=W)
+        cpwLbl.grid(column=0,row=5, sticky=W)
+        usernameField.grid(column=1,row=3, sticky=E)
+        pwField.grid(column=1,row=4, sticky=E)
+        cpwField.grid(column=1, row=5, sticky=E)
+        createAccountBtn.grid(column=1, row=6, sticky=E)
 
 #Login screen
 class Login(Frame):
@@ -80,14 +81,34 @@ class Login(Frame):
         pwLbl = Label(self, text="Password:")
         usernameField = Entry(self, width=20)
         pwField = Entry(self, width=20)
-        LoginBtn = Button(self, text="Login")
+        LoginBtn = Button(self, text="Login", command=lambda:controller.show_frame(MainControl)) #command to be changed to auth() once authentication is functional
 
         #design
-        usernameLbl.grid(column=0,row=3)
-        pwLbl.grid(column=0,row=4)
-        usernameField.grid(column=1,row=3)
-        pwField.grid(column=1,row=4)
-        LoginBtn.grid(column=1, row=6)
+        usernameLbl.grid(column=0,row=3, sticky=W)
+        pwLbl.grid(column=0,row=4, sticky=W)
+        usernameField.grid(column=1,row=3, sticky=E)
+        pwField.grid(column=1,row=4, sticky=E)
+        LoginBtn.grid(column=1, row=6, sticky=E)
+    
+    def auth(self):
+        return True
+        #if login is successful, change to ModeSelect
+class MainControl(Frame):
+    def __init__(self, parent, controller):
+        self.controller = controller;
+        Frame.__init__(self, parent)
+        self.container = Frame(self)
+        self.container.pack(side="top", fill="both", expand=True)
+        self.container.grid_rowconfigure(0,weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+        select = ModeSelect(self.container, self)
+        select.pack(side="top",fill=X, expand=False)
+
+    def showParams(self,mode):
+        params = EditParams(self.container, self, data.paramArrays[mode])
+        params.pack(side="top",fill=X, expand=False)
+        
 
 class ModeSelect(Frame):
     def __init__(self, parent, controller):
@@ -96,44 +117,42 @@ class ModeSelect(Frame):
         self.initValue = StringVar() 
         self.initValue.set("Select a Mode")
 
-        modes = [
-            "Select a Mode",
-            "AAT",
-            "VVT",
-            "AOO",
-            "AAI",
-            "VOO",
-            "VVI",
-            "VDD",
-            "DOO",
-            "DDI",
-            "DDD",
-            "AOOR",
-            "AAIR",
-            "VOOR",
-            "VVIR",
-            "VDDR",
-            "DOOR",
-            "DDIR",
-            "DDDR"
-        ]
-        
+        self.controller=controller
+
+
         lbl = Label(self, text="Select operating mode: ")
-        dropdown = OptionMenu(self, self.initValue, *modes, command=self.func)
+        dropdown = OptionMenu(self, self.initValue, *data.modes, command=self.func)
         
         lbl.grid(row=0, column=0)
-        dropdown.grid(row=1,column=1)
+        dropdown.grid(row=1,column=1, sticky=W)
+
+        logoutBtn = Button(self, text="Logout", command=lambda:controller.controller.show_frame(Login))
+        logoutBtn.grid(row=0, column=1, padx=290, pady=5, sticky=E)
 
         currentModeText = Label(self, text="Current Mode: ")
         currentModeText.grid(row=1, column=0, padx=5)
     
-    def func(self, value): #to be modified later to display new frame with param editer
-        print(value)
+    def func(self, value):
+        self.controller.showParams(value)
+
+class EditParams(Frame):
+    def __init__(self, parent, controller, params):     #pass in an array of parameters to be available for edit
+        Frame.__init__(self, parent)
+        self.params = params
+        i = 0
+        for p in params:
+            Label(self, text=params[i]+":").grid(column=0, row=i, sticky=W)
+            Entry(self, width=5).grid(column=1, row=i, sticky=W)
+            Button(self, text="Enter").grid(column=2, row=i, sticky=W)
+            i += 1
+
+
+
 #Instantiate app and change title and dimensions
 app = App()
 app.title("Pacemaker DCM")
 
-app.geometry('700x500')
+app.geometry('500x350')
 
 #open the app and await user interaction
 app.mainloop()
