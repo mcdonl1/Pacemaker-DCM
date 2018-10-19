@@ -50,24 +50,46 @@ class CreateAccount(Frame):
         usernameLbl = Label(self, text="Username:")
         pwLbl = Label(self, text="Password:")
         cpwLbl = Label(self, text="Confirm Password:")
-        usernameField = Entry(self, width=20)
-        pwField = Entry(self, width=20)
-        cpwField = Entry(self, width=20)
-        createAccountBtn = Button(self, text="Create Account", command=addUser("users.txt",usernameField.get(), pwField.get(), cpwField.get()))
+        self.usernameField = Entry(self, width=20)
+        self.pwField = Entry(self, width=20, show="*")
+        self.cpwField = Entry(self, width=20, show="*")
+        createAccountBtn = Button(self, text="Create Account", command=self.addUserHelper)
+        self.successMessage = Label(self, text = "")
+
 
         #design
         usernameLbl.grid(column=0,row=3, sticky=W)
         pwLbl.grid(column=0,row=4, sticky=W)
         cpwLbl.grid(column=0,row=5, sticky=W)
-        usernameField.grid(column=1,row=3, sticky=E)
-        pwField.grid(column=1,row=4, sticky=E)
-        cpwField.grid(column=1, row=5, sticky=E)
+        self.usernameField.grid(column=1,row=3, sticky=E)
+        self.pwField.grid(column=1,row=4, sticky=E)
+        self.cpwField.grid(column=1, row=5, sticky=E)
         createAccountBtn.grid(column=1, row=6, sticky=E)
+        self.successMessage.grid(column=1, row=7, sticky=E)
 
+    def addUserHelper(self):
+        pw = self.pwField.get()
+        cpw = self.cpwField.get()
+        user = self.usernameField.get()
+        print(pw)
+        if pw == cpw and pw != "":
+            addUser("users.txt", user, pw, cpw)
+            self.successMessage.config(text="Success! Please log in.")
+        elif pw != cpw:
+            self.successMessage.config(text="Passwords must match.")
+        elif pw == "" or cpw == "" or user == "":
+            self.successMessage.config(text="All fields are required.")
+        else:
+            self.successMessage.config(text="Failed: Please try again.")
+
+
+            
 #Login screen
 class Login(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
+
+        self.controller = controller
 
         createAcctScreenBtn = Button(self, text="Create Account", command=lambda:controller.show_frame(CreateAccount))
         loginScreenBtn = Button(self, text="Login", command=lambda:controller.show_frame(Login))
@@ -80,20 +102,29 @@ class Login(Frame):
         #components
         usernameLbl = Label(self, text="Username:")
         pwLbl = Label(self, text="Password:")
-        usernameField = Entry(self, width=20)
-        pwField = Entry(self, width=20)
-        LoginBtn = Button(self, text="Login", command=lambda:controller.show_frame(MainControl)) #command to be changed to auth() once authentication is functional
+        self.usernameField = Entry(self, width=20)
+        self.pwField = Entry(self, width=20, show="*")
+        LoginBtn = Button(self, text="Login", command=self.testLogin) #command to be changed to auth() once authentication is functional
+        self.failureWarning = Label(self, text="")
 
         #design
         usernameLbl.grid(column=0,row=3, sticky=W)
         pwLbl.grid(column=0,row=4, sticky=W)
-        usernameField.grid(column=1,row=3, sticky=E)
-        pwField.grid(column=1,row=4, sticky=E)
+        self.usernameField.grid(column=1,row=3, sticky=E)
+        self.pwField.grid(column=1,row=4, sticky=E)
         LoginBtn.grid(column=1, row=6, sticky=E)
+        self.failureWarning.grid(column=1, row=7, sticky=E)
     
     def auth(self):
         return True
         #if login is successful, change to ModeSelect
+
+    #Simple test authentication
+    def testLogin(self):
+        if self.usernameField.get() == "test" and self.pwField.get() == "password":
+            self.controller.show_frame(MainControl)
+        else:
+            self.failureWarning.config(text="Try again.")
 
 
 class MainControl(Frame):       #main control view of DCM - contains a mode selector and fields for editting parameters

@@ -22,7 +22,7 @@ modes = [
 #Each mode's parameters and their method of input
 #for dropdown menu, need to specify list of options
 paramArrays = {   
-            "AAT": [["LRL", "dropdown",["high", "mid", "low"]], ["URL", "entry"], ["AA", "dropdown", ["Opt 1"]], ["APW"], ["AS"], ["ARP"], ["PVARP"]],
+            "AAT": [["LRL", "dropdown",["high", "mid", "low"]], ["URL", "entry"], ["AA", "dropdown", ["Opt 1", "Opt 2"]], ["APW"], ["AS"], ["ARP"], ["PVARP"]],
             "VVT": ["LRL", "URL", "AA", "APW"],
             "AOO": [],
             "AAI": [],
