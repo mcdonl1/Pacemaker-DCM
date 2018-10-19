@@ -19,7 +19,7 @@ class App(Tk):
         #Instantiate each frame and assign it to the frame array in the app object
         self.frames = {}
 
-        for F in (CreateAccount, Login, MainControl):
+        for F in (CreateAccount, Login, MainControl, AdminPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -116,19 +116,18 @@ class Login(Frame):
         LoginBtn.grid(column=1, row=6, sticky=E)
         self.failureWarning.grid(column=1, row=7, sticky=E)
     
-    def auth(self):
-        return True
-        #if login is successful, change to ModeSelect
 
     #Simple test authentication
     def testLogin(self):
-        #if self.usernameField.get() == "test" and self.pwField.get() == "password":
-#            self.controller.show_frame(MainControl)
-#        else:
-#            self.failureWarning.config(text="Try again.")
-        auth = is_valid(self.usernameField.get(), self.pwField.get())
-        print(auth)
-        return auth
+        if self.usernameField.get() == "admin" and self.pwField.get() == "admin":
+           self.controller.show_frame(AdminPage)
+        else:
+            auth = is_valid(self.usernameField.get(), self.pwField.get())
+            print(auth)
+            if auth:
+                self.controller.show_frame(MainControl)
+            else:
+                self.failureWarning.config(text="Invalid username or password.")
 
 
 class MainControl(Frame):       #main control view of DCM - contains a mode selector and fields for editting parameters
@@ -149,7 +148,7 @@ class MainControl(Frame):       #main control view of DCM - contains a mode sele
     #Function to show parameter selection screen based on which mode has been selected in the mode dropdown
     def showParams(self,mode):
         #If params are showing, clear them and show newly selected mode's params
-        if(self.showingParams):
+        if self.showingParams:
             self.params.pack_forget() 
         self.params = EditParams(self.container, self, data.paramArrays[mode])
         self.params.pack(side="top",fill=X, expand=False)
@@ -193,8 +192,10 @@ class EditParams(Frame):
 
         #Create object properties to hold references to widgets created for later access
         self.params = params
+        self.dropdownValues = {}
         self.lbls = {}
         self.entries = {}
+        self.spinbox = {}
         self.btns = {}
 
         #Loops through list of parameters and creates required entry/dropdown fields with labels and buttons as required
@@ -212,20 +213,67 @@ class EditParams(Frame):
                 self.btns[param] = Button(self, text="Enter", command=lambda p=param: self.func(p))
                 self.btns[param].grid(column=2, row=i, sticky=W)
             elif entryType == "dropdown":
-                self.default = StringVar()
-                self.default.set(p[2][0])
-                self.entries[param] = OptionMenu(self, self.default, *p[2], command=self.dropdownValue)
+                self.dropdownValues[param] = StringVar()
+                self.dropdownValues[param].set(p[2][0])
+                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=self.printDropdownValue)
                 self.entries[param].grid(column=1, row=i, sticky=W)
+            elif entryType == "ranges":
+                self.dropdownValues[param] = StringVar()
+                self.dropdownValues[param].set(p[2][0])
+                print(param)
+                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param, index=i: self.showSpinbox(p,index))
+                self.entries[param].grid(column=1, row=i, sticky=W)
+            elif entryType == "spinbox":
+                self.spinbox[param] = Spinbox(self, from_=p[2], to=p[3], increment=p[4])
+                self.spinbox[param].grid(column=1, row=i, sticky=W)
             i += 1
 
     #function to handle value chosen in dropdown menu
-    def dropdownValue(self, value):
+    def printDropdownValue(self, value):
         print(value)
 
     #function to get values from entry field when button presses
     def func(self, value):  
-        param = self.entries[value].get()
-        print(param)
+        paramValue = self.entries[value].get()
+        print(paramValue)
+    #function to show a secondary entry method for params that have different ranges of values
+    def showSpinbox(self, param, index):
+        paramInfo = self.params[index] #param info list from data file
+        entryType = paramInfo[3]    #secondarry entry field
+
+        spinMode = 0    #initialize
+        if entryType == "spinbox":
+            
+            #find the index at which the info for this range's spinbox is stored
+            i = 0
+            for option in paramInfo[2]:
+                if option == self.dropdownValues[param].get():
+                    spinMode = i - 1
+                i += 1
+            lbl = Label(self, text="Adjust value:")
+            lbl.grid(column=2, row=index)
+           
+           #Create spinbox using data from data.py
+            self.spinbox[param] = Spinbox(self, from_=paramInfo[4][spinMode][0],to=paramInfo[4][spinMode][1], increment=paramInfo[4][spinMode][2])  
+            self.spinbox[param].grid(column=3, row=index)
+
+class AdminPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        lbl = Label(self, text="Admin page")
+        removeUsersBtn = Button(self, text="Clear Users", command=self.remove)
+        self.successMessage = Label(self, text="")
+
+        lbl.grid(row=0, column=0, sticky=W)
+        removeUsersBtn.grid(row=1, column=0, sticky=W)
+        self.successMessage.grid(row=1, column=1, sticky=E)
+
+        logoutBtn = Button(self, text="Logout", command=lambda:controller.show_frame(Login))
+        logoutBtn.grid(row=0, column=1, padx=290, pady=5, sticky=E)
+
+    def remove(self):
+        clearUsers("users.txt")
+        self.successMessage.config(text="Users cleared.")
 
 #Instantiate app and change title and dimensions
 app = App()
