@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
 from userAuth import *
+from authentication import is_valid
 import data as data
 
 
@@ -121,10 +122,13 @@ class Login(Frame):
 
     #Simple test authentication
     def testLogin(self):
-        if self.usernameField.get() == "test" and self.pwField.get() == "password":
-            self.controller.show_frame(MainControl)
-        else:
-            self.failureWarning.config(text="Try again.")
+        #if self.usernameField.get() == "test" and self.pwField.get() == "password":
+#            self.controller.show_frame(MainControl)
+#        else:
+#            self.failureWarning.config(text="Try again.")
+        auth = is_valid(self.usernameField.get(), self.pwField.get())
+        print(auth)
+        return auth
 
 
 class MainControl(Frame):       #main control view of DCM - contains a mode selector and fields for editting parameters
