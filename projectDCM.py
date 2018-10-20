@@ -190,7 +190,7 @@ class EditParams(Frame):
     def __init__(self, parent, controller, params):     #pass in an array of parameters to be available for edit
         Frame.__init__(self, parent)
 
-        #Create object properties to hold references to widgets created for later access
+        #Create object properties to hold references to widgets annd values created for later access
         self.params = params
         self.dropdownValues = {}
         self.lbls = {}
@@ -220,14 +220,17 @@ class EditParams(Frame):
             elif entryType == "ranges":
                 self.dropdownValues[param] = StringVar()
                 self.dropdownValues[param].set(p[2][0])
-                print(param)
                 self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param, index=i: self.showSpinbox(p,index))
                 self.entries[param].grid(column=1, row=i, sticky=W)
             elif entryType == "spinbox":
                 self.spinbox[param] = Spinbox(self, from_=p[2], to=p[3], increment=p[4])
                 self.spinbox[param].grid(column=1, row=i, sticky=W)
             i += 1
-
+        self.connected = PhotoImage(file="disconnected.gif")
+        self.communication = Label(self, image=self.connected) #will be changed while communicating with PACEMAKER
+        self.communication.photo = self.connected
+        self.communication.grid(column=1, row=i, pady=50)
+        
     #function to handle value chosen in dropdown menu
     def printDropdownValue(self, value):
         print(value)
