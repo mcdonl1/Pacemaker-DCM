@@ -153,6 +153,7 @@ class MainControl(Frame):       #main control view of DCM - contains a mode sele
         self.params = EditParams(self.container, self, data.paramArrays[mode])
         self.params.pack(side="top",fill=X, expand=False)
         self.showingParams = True
+        self.controller.geometry("800x500")
         
         
 #A view that allows the user to select their required mode of operation, which then triggers the required parameters to be displayed and editable
@@ -174,9 +175,11 @@ class ModeSelect(Frame):
         lbl.grid(row=0, column=0)
         dropdown.grid(row=1,column=1, sticky=W)
 
+        
+
         #Simple logout button that returns user to login screen upon press
         logoutBtn = Button(self, text="Logout", command=lambda:controller.controller.show_frame(Login))
-        logoutBtn.grid(row=0, column=1, padx=290, pady=5, sticky=E)
+        logoutBtn.grid(row=0, column=2, padx=90, pady=5, sticky=E)
 
         currentModeText = Label(self, text="Current Mode: ")
         currentModeText.grid(row=1, column=0, padx=5)
@@ -190,6 +193,9 @@ class EditParams(Frame):
     def __init__(self, parent, controller, params):     #pass in an array of parameters to be available for edit
         Frame.__init__(self, parent)
 
+        cvlbl = Label(self, text="Current Value")
+        cvlbl.grid(row=0, column=4, sticky=E)
+
         #Create object properties to hold references to widgets annd values created for later access
         self.params = params
         self.dropdownValues = {}
@@ -200,7 +206,7 @@ class EditParams(Frame):
 
         #Loops through list of parameters and creates required entry/dropdown fields with labels and buttons as required
         #Stores createed widgets in lists inside object for later access upon user interaction
-        i = 0
+        i = 1
         for p in params:
             param = p[0]
             if(len(p) == 1): entryType = "entry"
@@ -220,11 +226,14 @@ class EditParams(Frame):
             elif entryType == "ranges":
                 self.dropdownValues[param] = StringVar()
                 self.dropdownValues[param].set(p[2][0])
-                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param, index=i: self.showSpinbox(p,index))
+                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param, index=i-1: self.showSpinbox(p,index))
                 self.entries[param].grid(column=1, row=i, sticky=W)
             elif entryType == "spinbox":
                 self.spinbox[param] = Spinbox(self, from_=p[2], to=p[3], increment=p[4])
                 self.spinbox[param].grid(column=1, row=i, sticky=W)
+
+            self.currentValueDisp = Label(self, text=str(data.currentValues[param][0])).grid(column=4, row=i, padx=15, sticky=E)
+            self.currentValueUnits = Label(self, text=data.currentValues[param][1]).grid(column=5, row=i, sticky=W)
             i += 1
         self.connected = PhotoImage(file="disconnected.gif")
         self.communication = Label(self, image=self.connected) #will be changed while communicating with PACEMAKER
