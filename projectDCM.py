@@ -123,7 +123,6 @@ class Login(Frame):
            self.controller.show_frame(AdminPage)
         else:
             auth = is_valid(self.usernameField.get(), self.pwField.get())
-            print(auth)
             if auth:
                 self.controller.show_frame(MainControl)
             else:
@@ -194,7 +193,7 @@ class EditParams(Frame):
         Frame.__init__(self, parent)
 
         cvlbl = Label(self, text="Current Value")
-        cvlbl.grid(row=0, column=4, sticky=E)
+        cvlbl.grid(row=0, column=5, sticky=E)
 
         #Create object properties to hold references to widgets annd values created for later access
         self.params = params
@@ -203,6 +202,8 @@ class EditParams(Frame):
         self.entries = {}
         self.spinbox = {}
         self.btns = {}
+        self.currentValueDisp = {}
+        self.currentValueUnits = {}
 
         #Loops through list of parameters and creates required entry/dropdown fields with labels and buttons as required
         #Stores createed widgets in lists inside object for later access upon user interaction
@@ -216,46 +217,56 @@ class EditParams(Frame):
             if entryType == "entry":
                 self.entries[param] = Entry(self, width=5)
                 self.entries[param].grid(column=1, row=i, sticky=W)
-                self.btns[param] = Button(self, text="Enter", command=lambda p=param: self.func(p))
+                self.btns[param] = Button(self, text="Enter", command=lambda p=param: self.getEntryValue(p))
                 self.btns[param].grid(column=2, row=i, sticky=W)
             elif entryType == "dropdown":
                 self.dropdownValues[param] = StringVar()
                 self.dropdownValues[param].set(p[2][0])
-                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=self.printDropdownValue)
+                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param: self.getDropdownValue(v,p))
                 self.entries[param].grid(column=1, row=i, sticky=W)
             elif entryType == "ranges":
                 self.dropdownValues[param] = StringVar()
                 self.dropdownValues[param].set(p[2][0])
-                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param, index=i-1: self.showSpinbox(p,index))
+                self.entries[param] = OptionMenu(self, self.dropdownValues[param], *p[2], command=lambda v, p=param, index=i: self.showSpinbox(p,index))
                 self.entries[param].grid(column=1, row=i, sticky=W)
             elif entryType == "spinbox":
                 self.spinbox[param] = Spinbox(self, from_=p[2], to=p[3], increment=p[4])
                 self.spinbox[param].grid(column=1, row=i, sticky=W)
+                self.btns[param] = Button(self, text="Enter", command=lambda p=param: self.getSpinboxValue(p))
+                self.btns[param].grid(column=2, row=i, sticky=W)
 
-            self.currentValueDisp = Label(self, text=str(data.currentValues[param][0])).grid(column=4, row=i, padx=15, sticky=E)
-            self.currentValueUnits = Label(self, text=data.currentValues[param][1]).grid(column=5, row=i, sticky=W)
+            self.currentValueDisp[param] = Label(self, text=str(data.currentValues[param][0]))
+            self.currentValueDisp[param].grid(column=5, row=i, padx=15, sticky=E)
+            self.currentValueUnits[param] = Label(self, text=data.currentValues[param][1])
+            self.currentValueUnits[param].grid(column=6, row=i, sticky=W)
             i += 1
         self.connected = PhotoImage(file="disconnected.gif")
         self.communication = Label(self, image=self.connected) #will be changed while communicating with PACEMAKER
         self.communication.photo = self.connected
         self.communication.grid(column=1, row=i, pady=50)
+        self.programBtn = Button(self, text="Program", command=lambda:self.program())
+        self.programBtn.grid(column=0, row=i, pady=50)
         
     #function to handle value chosen in dropdown menu
-    def printDropdownValue(self, value):
-        print(value)
+    def getDropdownValue(self, value, param):
+        data.currentValues[param][0] = value
+        self.updateCurrentValues()
 
     #function to get values from entry field when button presses
-    def func(self, value):  
-        paramValue = self.entries[value].get()
-        print(paramValue)
+    def getEntryValue(self, param):  
+        data.currentValues[param][0] = self.entries[param].get()
+        self.updateCurrentValues()
+    
+    def getSpinboxValue(self, param):
+        data.currentValues[param][0] = self.spinbox[param].get()
+        self.updateCurrentValues()
+
     #function to show a secondary entry method for params that have different ranges of values
     def showSpinbox(self, param, index):
-        paramInfo = self.params[index] #param info list from data file
+        paramInfo = self.params[index-1] #param info list from data file
         entryType = paramInfo[3]    #secondarry entry field
-
         spinMode = 0    #initialize
         if entryType == "spinbox":
-            
             #find the index at which the info for this range's spinbox is stored
             i = 0
             for option in paramInfo[2]:
@@ -265,10 +276,31 @@ class EditParams(Frame):
             lbl = Label(self, text="Adjust value:")
             lbl.grid(column=2, row=index)
            
-           #Create spinbox using data from data.py
-            self.spinbox[param] = Spinbox(self, from_=paramInfo[4][spinMode][0],to=paramInfo[4][spinMode][1], increment=paramInfo[4][spinMode][2])  
+            #Create spinbox using data from data.py
+            #Create a button to enter the current value of the spinbo
+            self.spinbox[param] = Spinbox(self, from_=paramInfo[4][spinMode][0], to=paramInfo[4][spinMode][1], increment=paramInfo[4][spinMode][2])  
             self.spinbox[param].grid(column=3, row=index)
+            self.btns[param] = Button(self, text="Enter", command=lambda p=param: self.getSpinboxValue(p))
+            self.btns[param].grid(column=4, row=index, sticky=W)
 
+    def updateCurrentValues(self):
+        i=1
+        for p in self.params:
+            param = p[0]
+            self.currentValueDisp[param].grid_remove()
+
+        for p in self.params:
+            param = p[0]
+            self.currentValueDisp[param] = Label(self, text=str(data.currentValues[param][0]))
+            self.currentValueDisp[param].grid(column=5, row=i, padx=15, sticky=E)
+            i += 1
+    
+    def program(self):
+        for p in self.params:
+            param = p[0]
+            #sendValue(data.currentValues[param][0], param) #to be written (function to send a value to the PACEMAKER, will take value and parameter)
+            print("Values sending")
+            
 class AdminPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
