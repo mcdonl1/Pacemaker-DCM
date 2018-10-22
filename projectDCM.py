@@ -299,8 +299,8 @@ class EditParams(Frame):
         for p in self.params:
             param = p[0]
             #sendValue(data.currentValues[param][0], param) #to be written (function to send a value to the PACEMAKER, will take value and parameter)
-            print("Values sending")
-            
+            print(param +" value=" + str(data.currentValues[param][0]) + ". Sent." )
+
 class AdminPage(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
