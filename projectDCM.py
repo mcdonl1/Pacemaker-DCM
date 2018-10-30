@@ -161,15 +161,15 @@ class ModeSelect(Frame):
         Frame.__init__(self, parent)
         
         #The intial value for the dropdown menu
-        self.initValue = StringVar() 
-        self.initValue.set("Select a Mode")
+        self.dropdownValue = StringVar() 
+        self.dropdownValue.set("Select a Mode")
 
         #Pass controller to object for later use
         self.controller=controller
 
 
         lbl = Label(self, text="Select operating mode: ")
-        dropdown = OptionMenu(self, self.initValue, *data.modes, command=self.func)
+        dropdown = OptionMenu(self, self.dropdownValue, *data.modes, command=self.func)
         
         lbl.grid(row=0, column=0)
         dropdown.grid(row=1,column=1, sticky=W)
@@ -310,7 +310,7 @@ class AdminPage(Frame):
 
         lbl.grid(row=0, column=0, sticky=W)
         removeUsersBtn.grid(row=1, column=0, sticky=W)
-        self.successMessage.grid(row=1, column=1, sticky=E)
+        self.successMessage.grid(row=2, column=0, sticky=E)
 
         logoutBtn = Button(self, text="Logout", command=lambda:controller.show_frame(Login))
         logoutBtn.grid(row=0, column=1, padx=290, pady=5, sticky=E)
