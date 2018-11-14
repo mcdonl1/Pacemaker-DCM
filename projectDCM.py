@@ -370,6 +370,12 @@ class AdminPage(Frame):
         clearUsers("users.txt")
         self.successMessage.config(text="Users cleared.")
 
+class EgramDisplay(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        title = Label(self, text="Electrogram")
+        
+
 #Instantiate app and change title and dimensions
 app = App()
 app.title("Pacemaker DCM")
