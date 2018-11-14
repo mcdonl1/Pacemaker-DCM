@@ -3,6 +3,7 @@ from tkinter.ttk import *
 from userAuth import *
 from authentication import is_valid
 import data as data
+import serial
 
 
 currentUser = ""
@@ -135,7 +136,7 @@ class Login(Frame):
                 self.controller.show_frame(MainControl)
                 userFile = open(username+".txt", "r")
                 firstLine = userFile.readline()
-                
+
                 userFile.close()
                 userFile = open(username+".txt", "r")
 
@@ -328,6 +329,17 @@ class EditParams(Frame):
             param = p[0]
             #sendValue(data.currentValues[param][0], param) #to be written (function to send a value to the PACEMAKER, will take value and parameter)
             print(param +" value=" + data.currentValues[param][0] + ". Sent." )
+            ser = serial.open(port) #need to find which port
+            for 
+            for param, value in data.currentValues.items():
+                if value[2] == 'int':
+                    ser.write(int(value[0][:-1]))
+                elif value[2] == 'str':
+                    ser.write(value[0][:-1])
+                elif value[2] == 'float':
+                    ser.write(float(value[0][:-1]))
+
+            ser.close()
     
     def save(self):
         userFile = open(data.currentUser+".txt", "w")
