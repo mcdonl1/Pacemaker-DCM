@@ -59,6 +59,8 @@ def getUserN(fName):
 def addUser(fName, user, passw, confirmpassw):
     'adds the user into file f. Returns 1 if successful, 0 if user already exists'
     data = getUsers(fName)
+    if (int(getUserN(fName)) >= 10):
+        return 0
     if user not in data:
         if passw == confirmpassw:
             data[user] = passw

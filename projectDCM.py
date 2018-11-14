@@ -5,6 +5,7 @@ from authentication import is_valid
 import data as data
 
 
+currentUser = ""
 #App class - top level controller for gui
 class App(Tk):
 
@@ -72,10 +73,15 @@ class CreateAccount(Frame):
         pw = self.pwField.get()
         cpw = self.cpwField.get()
         user = self.usernameField.get()
-        print(pw)
         if pw == cpw and pw != "":
-            addUser("users.txt", user, pw, cpw)
-            self.successMessage.config(text="Success! Please log in.")
+            success = addUser("users.txt", user, pw, cpw)
+            if(success):
+                userFile = open(user+".txt", "w")
+                userFile.write("usedefault")
+                userFile.close()
+                self.successMessage.config(text="Success! Please log in.")
+            else: 
+                self.successMessage.config(text="Too many users. Could not add user.")
         elif pw != cpw:
             self.successMessage.config(text="Passwords must match.")
         elif pw == "" or cpw == "" or user == "":
@@ -119,12 +125,31 @@ class Login(Frame):
 
     #Simple test authentication
     def testLogin(self):
-        if self.usernameField.get() == "admin" and self.pwField.get() == "admin":
+        username = self.usernameField.get()
+        if username == "admin" and self.pwField.get() == "admin":
            self.controller.show_frame(AdminPage)
         else:
-            auth = is_valid(self.usernameField.get(), self.pwField.get())
+            auth = is_valid(username, self.pwField.get())
             if auth:
+                data.currentUser = username
                 self.controller.show_frame(MainControl)
+                userFile = open(username+".txt", "r")
+                firstLine = userFile.readline()
+                
+                userFile.close()
+                userFile = open(username+".txt", "r")
+
+                if firstLine != "usedefault":
+                    for param, value in data.currentValues.items():
+                        line = userFile.readline()
+                        data.currentValues[param][0] = line[:-1] #strip newline char
+                    userFile.close()
+                else:
+                    userFile = open(username+".txt", "w")
+                    for param, value in data.currentValues.items():
+                        userFile.write(str(value[0]))
+                    userFile.close()
+
             else:
                 self.failureWarning.config(text="Invalid username or password.")
 
@@ -152,6 +177,7 @@ class MainControl(Frame):       #main control view of DCM - contains a mode sele
         self.params = EditParams(self.container, self, data.paramArrays[mode])
         self.params.pack(side="top",fill=X, expand=False)
         self.showingParams = True
+        data.currentValues["Mode"][0] = mode
         self.controller.geometry("800x500")
         
         
@@ -235,7 +261,7 @@ class EditParams(Frame):
                 self.btns[param] = Button(self, text="Enter", command=lambda p=param: self.getSpinboxValue(p))
                 self.btns[param].grid(column=2, row=i, sticky=W)
 
-            self.currentValueDisp[param] = Label(self, text=str(data.currentValues[param][0]))
+            self.currentValueDisp[param] = Label(self, text=data.currentValues[param][0])
             self.currentValueDisp[param].grid(column=5, row=i, padx=15, sticky=E)
             self.currentValueUnits[param] = Label(self, text=data.currentValues[param][1])
             self.currentValueUnits[param].grid(column=6, row=i, sticky=W)
@@ -243,22 +269,24 @@ class EditParams(Frame):
         self.connected = PhotoImage(file="disconnected.gif")
         self.communication = Label(self, image=self.connected) #will be changed while communicating with PACEMAKER
         self.communication.photo = self.connected
-        self.communication.grid(column=1, row=i, pady=50)
+        self.communication.grid(column=2, row=i, pady=50)
         self.programBtn = Button(self, text="Program", command=lambda:self.program())
         self.programBtn.grid(column=0, row=i, pady=50)
+        self.programBtn = Button(self, text="Save", command=lambda:self.save())
+        self.programBtn.grid(column=1, row=i, pady=50)
         
     #function to handle value chosen in dropdown menu
     def getDropdownValue(self, value, param):
-        data.currentValues[param][0] = value
+        data.currentValues[param][0] = str(value)
         self.updateCurrentValues()
 
     #function to get values from entry field when button presses
     def getEntryValue(self, param):  
-        data.currentValues[param][0] = self.entries[param].get()
+        data.currentValues[param][0] = str(self.entries[param].get())
         self.updateCurrentValues()
     
     def getSpinboxValue(self, param):
-        data.currentValues[param][0] = self.spinbox[param].get()
+        data.currentValues[param][0] = str(self.spinbox[param].get())
         self.updateCurrentValues()
 
     #function to show a secondary entry method for params that have different ranges of values
@@ -291,7 +319,7 @@ class EditParams(Frame):
 
         for p in self.params:
             param = p[0]
-            self.currentValueDisp[param] = Label(self, text=str(data.currentValues[param][0]))
+            self.currentValueDisp[param] = Label(self, text=data.currentValues[param][0])
             self.currentValueDisp[param].grid(column=5, row=i, padx=15, sticky=E)
             i += 1
     
@@ -299,7 +327,18 @@ class EditParams(Frame):
         for p in self.params:
             param = p[0]
             #sendValue(data.currentValues[param][0], param) #to be written (function to send a value to the PACEMAKER, will take value and parameter)
-            print(param +" value=" + str(data.currentValues[param][0]) + ". Sent." )
+            print(param +" value=" + data.currentValues[param][0] + ". Sent." )
+    
+    def save(self):
+        userFile = open(data.currentUser+".txt", "w")
+        userFile.write("")
+        userFile.close()
+        userFile = open(data.currentUser+".txt", "w")
+        for param, value in data.currentValues.items():
+            userFile.write(value[0]+'\n')
+        
+        userFile.close()
+
 
 class AdminPage(Frame):
     def __init__(self, parent, controller):

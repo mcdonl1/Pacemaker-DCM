@@ -1,0 +1,2 @@
+ DONE -Need to add functionality to save each user's params as text file to keep each users information between sessions.
+ -Implement serial communication.
