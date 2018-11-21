@@ -330,7 +330,6 @@ class EditParams(Frame):
             #sendValue(data.currentValues[param][0], param) #to be written (function to send a value to the PACEMAKER, will take value and parameter)
             print(param +" value=" + data.currentValues[param][0] + ". Sent." )
             ser = serial.open(port) #need to find which port
-            for 
             for param, value in data.currentValues.items():
                 if value[2] == 'int':
                     ser.write(int(value[0][:-1]))
