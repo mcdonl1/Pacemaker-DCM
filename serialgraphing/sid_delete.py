@@ -11,7 +11,7 @@ arduinoSerialData.port='COM7'
 arduinoSerialData.open()
 
 def run_it():
-        while True:
+	while True:
 		if (str(arduinoSerialData.readline()))!='':
 			try:
 			    s= arduinoSerialData.readline()

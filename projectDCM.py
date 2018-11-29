@@ -4,6 +4,7 @@ from userAuth import *
 from authentication import is_valid
 import data as data
 import serial
+from EgramDisplay import EgramDisplay
 
 
 currentUser = ""
@@ -21,7 +22,7 @@ class App(Tk):
         #Instantiate each frame and assign it to the frame array in the app object
         self.frames = {}
 
-        for F in (CreateAccount, Login, MainControl, AdminPage):
+        for F in (CreateAccount, Login, MainControl, AdminPage, EgramDisplay):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -201,11 +202,13 @@ class ModeSelect(Frame):
         lbl.grid(row=0, column=0)
         dropdown.grid(row=1,column=1, sticky=W)
 
-        
+        #Button to display egram data
+        egramBtn = Button(self, text="Electrogram", command=lambda: controller.controller.show_frame(EgramDisplay))
+        egramBtn.grid(row=0, column=2,sticky=E)
 
         #Simple logout button that returns user to login screen upon press
         logoutBtn = Button(self, text="Logout", command=lambda:controller.controller.show_frame(Login))
-        logoutBtn.grid(row=0, column=2, padx=90, pady=5, sticky=E)
+        logoutBtn.grid(row=0, column=3, padx=30, pady=5, sticky=E)
 
         currentModeText = Label(self, text="Current Mode: ")
         currentModeText.grid(row=1, column=0, padx=5)
@@ -369,11 +372,7 @@ class AdminPage(Frame):
         clearUsers("users.txt")
         self.successMessage.config(text="Users cleared.")
 
-class EgramDisplay(Frame):
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
-        title = Label(self, text="Electrogram")
-        
+
 
 #Instantiate app and change title and dimensions
 app = App()
