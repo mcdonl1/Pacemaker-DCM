@@ -6,7 +6,6 @@ import data as data
 import serial
 from EgramDisplay import EgramDisplay
 
-
 currentUser = ""
 #App class - top level controller for gui
 class App(Tk):

@@ -1,9 +1,21 @@
  DONE -Need to add functionality to save each user's params as text file to keep each users information between sessions.
  -Implement serial communication.
-    ~Determine format to send data and implement sending data
-    ~determine the format to recieve and store data - implement it
- -Add a egram page that displays stored data
-    ~Add a graph using static stored data (Matplotlib with Tkinter integrations
-     [https://pythonprogramming.net/how-to-embed-matplotlib-graph-tkinter-gui/])
-    ~Change graph to update live from serial rx data while (Matplotlib - going to need changes to make it work with tkinter
-     [https://pythonprogramming.net/embedding-live-matplotlib-graph-tkinter-gui/?completed=/how-to-embed-matplotlib-graph-tkinter-gui/])
+    ~Determine format to send data and implement sending data DONE
+    ~determine the format to recieve and store data DONE
+ -Add a egram page that displays stored data DONE
+
+Sid   - write preliminary serial code to test setup with]
+      - Start code = 16
+      - request pacemaker params = 22
+      - send pacemaker params = 55 (ask for params back)
+      - request egram = 33
+      Ex:
+      def transmit(type)
+         send(16)
+         if type == request egram
+            send 33 #Means toggle sending
+            display egram
+
+Lucas - fix params screen
+      - test egram display
+      - make egram display repeatable
