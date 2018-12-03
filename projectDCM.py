@@ -4,7 +4,12 @@ from userAuth import *
 from authentication import is_valid
 import data as data
 import serial
-from EgramDisplay import EgramDisplay
+from serialgraphing import live_graph as graph
+
+import matplotlib
+matplotlib.use("TkAgg")
+#from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.figure import Figure
 
 currentUser = ""
 #App class - top level controller for gui
@@ -269,9 +274,7 @@ class EditParams(Frame):
             self.currentValueUnits[param] = Label(self, text=data.currentValues[param][1])
             self.currentValueUnits[param].grid(column=6, row=i, sticky=W)
             i += 1
-        self.connected = PhotoImage(file="disconnected.gif")
-        self.communication = Label(self, image=self.connected) #will be changed while communicating with PACEMAKER
-        self.communication.photo = self.connected
+        self.communication = Label(self, text="Connected") #will be changed while communicating with PACEMAKER
         self.communication.grid(column=2, row=i, pady=50)
         self.programBtn = Button(self, text="Program", command=lambda:self.program())
         self.programBtn.grid(column=0, row=i, pady=50)
@@ -371,6 +374,20 @@ class AdminPage(Frame):
         clearUsers("users.txt")
         self.successMessage.config(text="Users cleared.")
 
+
+class EgramDisplay(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        self.controller = controller
+
+        label = Label(self, text="Graph Page", font=26)
+        label.pack(pady=10,padx=10)
+
+        showPlotButton= Button(self, text="Show Electrogram", command=lambda: graph.showPlot())
+        showPlotButton.pack()
+
+        button1 = Button(self, text="Back to Dashboard",command=lambda: controller.show_frame(MainControl))
+        button1.pack()
 
 
 #Instantiate app and change title and dimensions
