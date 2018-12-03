@@ -3,8 +3,9 @@ from tkinter.ttk import *
 from userAuth import *
 from authentication import is_valid
 import data as data
-import serial
+import serialCom as serialCom
 from serialgraphing import live_graph as graph
+
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -330,21 +331,15 @@ class EditParams(Frame):
             i += 1
     
     def program(self):
-        for p in self.params:
-            param = p[0]
-            #sendValue(data.currentValues[param][0], param) #to be written (function to send a value to the PACEMAKER, will take value and parameter)
-            print(param +" value=" + data.currentValues[param][0] + ". Sent." )
-            ser = serial.open(port) #need to find which port
-            for param, value in data.currentValues.items():
-                if value[2] == 'int':
-                    ser.write(int(value[0][:-1]))
-                elif value[2] == 'str':
-                    ser.write(value[0][:-1])
-                elif value[2] == 'float':
-                    ser.write(float(value[0][:-1]))
+        print(serialCom.txEnable)
+        serialCom.txEnable = True
+        print(serialCom.txEnable)
+        serialCom.transmit('sendParams')
 
-            ser.close()
-    
+        serialCom.txEnable = True
+        serialCom.transmit('requestParams')
+
+
     def save(self):
         userFile = open(data.currentUser+".txt", "w")
         userFile.write("")
@@ -380,7 +375,7 @@ class EgramDisplay(Frame):
         Frame.__init__(self, parent)
         self.controller = controller
 
-        label = Label(self, text="Graph Page", font=26)
+        label = Label(self, text="Electrogram", font=26)
         label.pack(pady=10,padx=10)
 
         showPlotButton= Button(self, text="Show Electrogram", command=lambda: graph.showPlot())
