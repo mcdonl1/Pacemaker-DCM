@@ -7,17 +7,17 @@ except WindowsError:
         pass
 
 arduinoSerialData=serial.Serial(timeout=1,baudrate=9600)
-arduinoSerialData.port='COM7'
+arduinoSerialData.port='COM3'
 arduinoSerialData.open()
 
 def run_it():
 	while True:
-		if (str(arduinoSerialData.readline()))!='':
+		if (str(arduinoSerialData.read(1)))!='':
 			try:
-			    s= arduinoSerialData.readline()
+			    s= arduinoSerialData.read(1)
 			    with open('readings.txt', 'a') as f:
-			        f.write(s)
-			        print (s)
+			        f.write(str(int.from_bytes(s, byteorder='big'))+'\n')
+			        print (str(int.from_bytes(s, byteorder='big')))
 			except IndexError:
 				run_it()
 		else:

@@ -10,7 +10,7 @@ plt.ylim(ymax=1050)
 
 def animate(i):
     graph_data=open('readings.txt','r').read() #reads all the file at once
-    lines = graph_data.split('\r\n')
+    lines = graph_data.split('\n')
     lines.pop()# removes the last element which is a whitespace
     
     ys = list(map(int,lines)) #maps values to integer
