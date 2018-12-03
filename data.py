@@ -100,14 +100,14 @@ paramArrays = {
 
 #stores current values of each parameter - modified by parameter edit screen each time a parameter is changed
 currentValues = {
-    "Mode": ["DDD",""],
-    "Lower Rate Limit": ["60","ppm"],
-    "Upper Rate Limit": ["120","ppm"],
-    "Maximum Sensor Rate": ["120","ppm"],
-    "Atrial Amplitude": ["3.5","V"],
-    "Ventricular Amplitude": ["3.5","V"],
-    "Atrial Pulse Width": ["0.4","ms"],
-    "Ventricular Pulse Width": ["0.4","ms"],
+    "Mode": ["DDD",""],                         #uint8
+    "Lower Rate Limit": ["60","ppm"],              #uint8
+    "Upper Rate Limit": ["120","ppm"],              #uint8
+    "Atrial Amplitude": ["3.5","V"],                #single
+    "Ventricular Amplitude": ["3.5","V"],           #single
+    "Atrial Pulse Width": ["0.4","ms"],             #single
+    "Ventricular Pulse Width": ["0.4","ms"],        #single
+    "Activity Threshold": ["Med",""],                         #single
 }
 
 currentUser = ""
