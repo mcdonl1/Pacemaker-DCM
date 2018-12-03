@@ -41,10 +41,14 @@ def transmit(comType):
 
 			#Serialize and send params 
 			for k in params.keys():
-				if (k=='mode' or k=="Maximum Sensor Rate"):
+				if (k=='mode'):
 					continue #skip mode since that was already done above
-				if (k=="Lower Rate Limit" or k=="Upper Rate Limit"): #unsigned 8 bit ints
+				if (k=="Lower Rate Limit" or k=="Upper Rate Limit" or k== 'Maximum Sensor Rate' or k== 'Dynamic AV Delay'  or k== 'Rate Smoothing' or k== 'ATR Mode' or k== 'ATR Fallback Time' or k== 'Response Time' or k== 'Response Factor' or k== 'Recovery Time'): #unsigned 8 bit ints
 					serial.write(serializeData(params[k],False,1));
+				if (k== 'Fixed AV Delay' or k == 'Ventricular Refactory Period' or k == 'PVARP' or k == 'Atrial Refactory Period' or k == 'PVARP Extension' or k == 'ATR Duration'):
+					serial.write(serializeData(params[k],False,2));
+				if(k== 'Sensed AV Delay Offset'):
+					serial.write(serializeData(params[k],True,1));
 				else: #singles 
 					serial.write(serializeData(params[k],True,4))
 
@@ -66,6 +70,8 @@ def transmit(comType):
 
 
 def receive(comType):
+	'reads incoming serial data'
+
 	started = False
 	while (rxEnable):
 		readData = serialObj.readline()
@@ -75,14 +81,14 @@ def receive(comType):
 		if (int.from_bytes(readData, byteorder='big', signed=False) == 16): #start code detected
 			started = True
 
-		
+		storedParams = []
 		if (started):
 			if (comType == 'egram'):
 				pass #keep reading and display on plot
 			elif (comType == 'receiveParams'):
-				pass #read, and store parameter values for return
+				storedParams.append(readData)
 
-	return None #return received parameters
+	return storedParams #return received parameters
 
 
 
