@@ -12,7 +12,7 @@ serialObj = serial.Serial(timeout=1,baudrate=115200)
 serialObj.port='COM3'
 txEnable = False #True if transmitting
 rxEnable = False #True if receiving
-serialObj.open()
+# serialObj.open()
 
 
 def endComs():
@@ -28,50 +28,63 @@ def serializeData(dataVal, sign, byteLen):
 	return dataVal.to_bytes(byteLen, byteorder='big', signed=sign)
 
 def transmit(comType):
+	if(serialObj.isOpen()):
+		serialObj.close()
+	serialObj.open()
 	'transmits data based on comType requested'
-	if (txEnable == True):
-		serialObj.write(START_CODE)
+	serialObj.write(START_CODE)
+	
+	if (comType == 'sendParams'):
+		serialObj.write(serializeData(SEND_PACE_PARAMS_CODE,False,1)) #begin params transmission
+		params = data.currentValues
+		
+		modeNum = data.modes.index(data.currentValues['Mode'][0])
+		serialObj.write(serializeData(modeNum,False,1))
 
-		if (comType == 'sendParams'):
-			serialObj.write(serializeData(SEND_PACE_PARAMS_CODE,False,1)) #begin params transmission
-			params = data.currentValues
-			
-			modeNum = index(data.modes["mode"])
-			serial.write(serializeData(modeNum,False,1));
+		#Serialize and send params 
+		#Serialize and send params 
+		for k in params.keys():
+			if (k=='mode'):
+				continue #skip mode since that was already done above
+			if (k=="Lower Rate Limit" or k=="Upper Rate Limit" or k== 'Maximum Sensor Rate' or k== 'Dynamic AV Delay'  or k== 'Rate Smoothing' or k== 'ATR Mode' or k== 'ATR Fallback Time' or k== 'Response Time' or k== 'Response Factor' or k== 'Recovery Time'): #unsigned 8 bit ints
+				serial.write(serializeData(params[k],False,1));
+			if (k== 'Fixed AV Delay' or k == 'Ventricular Refactory Period' or k == 'PVARP' or k == 'Atrial Refactory Period' or k == 'PVARP Extension' or k == 'ATR Duration'):
+				serial.write(serializeData(params[k],False,2));
+			if(k== 'Sensed AV Delay Offset'):
+				serial.write(serializeData(params[k],True,1));
+			else: #singles 
+				serial.write(serializeData(params[k],True,4))
 
-			#Serialize and send params 
-			for k in params.keys():
-				if (k=='mode'):
-					continue #skip mode since that was already done above
-				if (k=="Lower Rate Limit" or k=="Upper Rate Limit" or k== 'Maximum Sensor Rate' or k== 'Dynamic AV Delay'  or k== 'Rate Smoothing' or k== 'ATR Mode' or k== 'ATR Fallback Time' or k== 'Response Time' or k== 'Response Factor' or k== 'Recovery Time'): #unsigned 8 bit ints
-					serial.write(serializeData(params[k],False,1));
-				if (k== 'Fixed AV Delay' or k == 'Ventricular Refactory Period' or k == 'PVARP' or k == 'Atrial Refactory Period' or k == 'PVARP Extension' or k == 'ATR Duration'):
-					serial.write(serializeData(params[k],False,2));
-				if(k== 'Sensed AV Delay Offset'):
-					serial.write(serializeData(params[k],True,1));
-				else: #singles 
-					serial.write(serializeData(params[k],True,4))
-
-			serialObj.write(serializeData(SEND_PACE_PARAMS_CODE,False,1)) #end params transmission
-			
-			txEnable = False
-
-			rxEnable = True
-			receivedParams = receiveParams(comType)	#receive parameters
-			#verify parameters
-
-		if (comType == 'egram'):
-			serialObj.write(serializeData(EGRAM_CODE,False,1))
-			txEnable = False
-			rxEnable = True
-			receive(comType)
-
+		serialObj.write(serializeData(SEND_PACE_PARAMS_CODE,False,1)) #end params transmission
+		
 		txEnable = False
+
+		rxEnable = True
+		receivedParams = receive(comType)	#receive parameters
+		#verify parameters
+
+	if (comType == 'egram'):
+		serialObj.write(serializeData(EGRAM_CODE,False,1))
+		txEnable = False
+		rxEnable = True
+		receive(comType)
+
+	if (comType == 'requestParams'):
+		serialObj.write(serializeData(REQ_PACE_PARAMS_CODE,False,1))
+		txEnable = False
+		rxEnable = True
+		receive(comType)
+
+
+	serialObj.close()
 
 
 def receive(comType):
-	'reads incoming serial data'
 
+	global rxEnable
+	if(serialObj.isOpen()):
+		serialObj.close()
+	serialObj.open()
 	started = False
 	while (rxEnable):
 		readData = serialObj.readline()
@@ -87,8 +100,9 @@ def receive(comType):
 				pass #keep reading and display on plot
 			elif (comType == 'receiveParams'):
 				storedParams.append(readData)
-
-	return storedParams #return received parameters
+	serialObj.close()
+	return storedParams #return received parameter
+	
 
 
 

@@ -17,7 +17,7 @@ def run_it():
 			    s= arduinoSerialData.read(1)
 			    with open('readings.txt', 'a') as f:
 			        f.write(str(int.from_bytes(s, byteorder='big'))+'\n')
-			        print (str(int.from_bytes(s, byteorder='big')))
+			        #print (str(int.from_bytes(s, byteorder='big')))
 			except IndexError:
 				run_it()
 		else:
